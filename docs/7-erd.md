@@ -9,8 +9,8 @@ erDiagram
         VARCHAR name "회원 이름"
         VARCHAR role "ADMIN, USER"
         VARCHAR status "ACTIVE, WITHDRAWN"
-        DATETIME created_at "가입일시"
-        DATETIME withdrawn_at "탈퇴일시"
+        TIMESTAMPTZ created_at "가입일시"
+        TIMESTAMPTZ withdrawn_at "탈퇴일시"
         INT token_version "토큰 무효화 기준값"
     }
 
@@ -23,15 +23,15 @@ erDiagram
         DATE start_date "시작일"
         DATE end_date "종료일"
         VARCHAR status "TODO, IN_PROGRESS, QA, RESOLVED, DONE"
-        DATETIME created_at "등록일시"
-        DATETIME updated_at "수정일시"
+        TIMESTAMPTZ created_at "등록일시"
+        TIMESTAMPTZ updated_at "수정일시"
     }
 
     TIME_ALLOCATION {
         BIGINT id PK "시간 할당 식별자"
         BIGINT wbs_id FK "대상 WBS ID"
-        DATE work_date "작업일자"
-        TINYINT hours "투입시간(1~8)"
+        DATE work_date "작업일자 (wbs_id와 UNIQUE)"
+        SMALLINT hours "투입시간(1~8)"
     }
 
     USER ||--o{ WBS : "작성 (writer_id)"

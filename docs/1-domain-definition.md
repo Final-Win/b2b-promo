@@ -27,7 +27,7 @@
 | 시간할당됨 | 일자별 수행시간 입력 | 해당 WBS의 총 투입시간 합산 갱신, 일자별 8시간 초과 여부 검증 |
 | WBS삭제됨 | 작성자 본인이 삭제 | 하위 시간 할당 레코드 함께 삭제 |
 
-- **의존성**: 시간할당됨은 WBS등록됨 이후에만 발생 가능. WBS상태변경됨(DONE)은 회원 단독으로 발생 불가(관리자 승인 필요).
+- **의존성**: 시간할당됨은 WBS등록됨 이후에만 발생 가능. WBS상태변경됨(DONE)은 회원 단독으로 발생 불가, 관리자만 상세패널에서 직접 변경 가능(별도 승인 요청 플로우 없음).
 
 ## 5. 경계 컨텍스트
 
@@ -49,21 +49,21 @@
 
 | 도메인명 | 물리명 | 데이터타입 | 길이/정밀도 | 필수여부 | 기본값 | 허용값/코드 | 형식/제약 | 설명 |
 |---|---|---|---|---|---|---|---|---|
-| 회원ID | id | BIGINT | - | Y | AUTO_INCREMENT | - | PK | 회원 식별자 |
+| 회원ID | id | BIGSERIAL | - | Y | AUTO_INCREMENT | - | PK | 회원 식별자 |
 | 이메일 | email | VARCHAR | 100 | Y | - | - | 형식 검증, UNIQUE | 로그인 ID |
 | 비밀번호 | password | VARCHAR | 255 | Y | - | - | 암호화 저장 | 로그인 비밀번호 |
 | 이름 | name | VARCHAR | 50 | Y | - | - | - | 회원 이름 |
 | 권한 | role | VARCHAR | 20 | Y | USER | ADMIN, USER | - | 관리자/일반 회원 구분 |
 | 상태 | status | VARCHAR | 20 | Y | ACTIVE | ACTIVE, WITHDRAWN | - | 탈퇴 여부 |
-| 가입일시 | created_at | DATETIME | - | Y | now() | - | - | 회원가입 시각 |
-| 탈퇴일시 | withdrawn_at | DATETIME | - | N | NULL | - | - | 탈퇴 처리 시각 |
+| 가입일시 | created_at | TIMESTAMPTZ | - | Y | now() | - | - | 회원가입 시각 |
+| 탈퇴일시 | withdrawn_at | TIMESTAMPTZ | - | N | NULL | - | - | 탈퇴 처리 시각 |
 | 토큰버전 | token_version | INT | - | Y | 0 | - | 로그아웃/탈퇴 시 +1 | Refresh Token 무효화 기준값(발급 시점 버전과 다르면 재발급 거부) |
 
 ### 엔티티: WBS (업무)
 
 | 도메인명 | 물리명 | 데이터타입 | 길이/정밀도 | 필수여부 | 기본값 | 허용값/코드 | 형식/제약 | 설명 |
 |---|---|---|---|---|---|---|---|---|
-| WBS ID | id | BIGINT | - | Y | AUTO_INCREMENT | - | PK | WBS(업무) 식별자 |
+| WBS ID | id | BIGSERIAL | - | Y | AUTO_INCREMENT | - | PK | WBS(업무) 식별자 |
 | 작성자ID | writer_id | BIGINT | - | Y | - | - | FK → 회원.id | 등록/수정/삭제 권한 기준(본인 글만 가능) |
 | 담당자ID | assignee_id | BIGINT | - | Y | - | - | FK → 회원.id | 업무 담당 회원 |
 | 제목 | title | VARCHAR | 200 | Y | - | - | - | 업무 제목 |
@@ -71,22 +71,22 @@
 | 시작일 | start_date | DATE | - | Y | - | - | - | 캘린더 막대 시작일 |
 | 종료일 | end_date | DATE | - | Y | - | - | end_date ≥ start_date | 캘린더 막대 종료일 |
 | 상태 | status | VARCHAR | 20 | Y | TODO | TODO(회색), IN_PROGRESS(하늘색), QA(하늘색), RESOLVED(초록색), DONE(초록색) | 회원은 RESOLVED까지, DONE은 관리자만 변경 가능 | 진행 상태 |
-| 등록일시 | created_at | DATETIME | - | Y | now() | - | - | 최초 등록 시각 |
-| 수정일시 | updated_at | DATETIME | - | Y | now() | - | - | 최종 수정 시각 |
+| 등록일시 | created_at | TIMESTAMPTZ | - | Y | now() | - | - | 최초 등록 시각 |
+| 수정일시 | updated_at | TIMESTAMPTZ | - | Y | now() | - | - | 최종 수정 시각(UPDATE 시 트리거로 자동 갱신) |
 
 ### 엔티티: 시간 할당 (Time Allocation)
 
 | 도메인명 | 물리명 | 데이터타입 | 길이/정밀도 | 필수여부 | 기본값 | 허용값/코드 | 형식/제약 | 설명 |
 |---|---|---|---|---|---|---|---|---|
-| 할당ID | id | BIGINT | - | Y | AUTO_INCREMENT | - | PK | 시간 할당 식별자 |
+| 할당ID | id | BIGSERIAL | - | Y | AUTO_INCREMENT | - | PK | 시간 할당 식별자 |
 | WBS ID | wbs_id | BIGINT | - | Y | - | - | FK → WBS.id | 대상 업무 |
-| 작업일자 | work_date | DATE | - | Y | - | - | - | 시간을 투입한 일자 |
-| 투입시간 | hours | TINYINT | - | Y | - | 1~8 | 1시간 단위, 초과 저장 가능(하드 블록 없음) | 해당 일자에 투입한 시간 |
+| 작업일자 | work_date | DATE | - | Y | - | - | UNIQUE(wbs_id, work_date) | 시간을 투입한 일자. 한 WBS는 같은 날짜에 1건만 가짐(수정 시 전량 삭제 후 재삽입) |
+| 투입시간 | hours | SMALLINT | - | Y | - | 1~8 | 1시간 단위, 초과 저장 가능(하드 블록 없음) | 해당 일자에 투입한 시간 |
 
 ### 데이터 품질 규칙
-- WBS.start_date ≤ WBS.end_date
-- 시간할당.work_date는 WBS.start_date ~ end_date 범위 내
-- 동일 회원 기준 동일 work_date의 hours 합계가 8시간을 초과해도 저장은 허용되며, 이 경우 UI에 경고를 표시한다(하드 블록 아님)
+- WBS.start_date ≤ WBS.end_date (DB CHECK로 강제)
+- 시간할당.work_date는 WBS.start_date ~ end_date 범위 내 (테이블 간 제약이라 DB CHECK로 강제 불가 — 컨트롤러에서 검증 필수)
+- 동일 회원 기준 동일 work_date의 **모든 WBS를 합친** hours 합계가 8시간을 초과해도 저장은 허용되며, 이 경우 UI에 경고를 표시한다(하드 블록 아님). 이 회원별 일자 합계는 서버가 계산해 조회 API로 제공(project-principle 3절 daily-sum)
 
 ## 7. 비기능 요구사항
 

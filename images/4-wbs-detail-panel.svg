@@ -47,16 +47,16 @@
 
   <text x="16" y="394" font-size="12" fill="#444">08-12</text>
   <rect x="70" y="382" width="50" height="22" fill="#fff" stroke="#888"/>
-  <text x="95" y="398" font-size="11" text-anchor="middle" fill="#333">4</text>
+  <text x="95" y="398" font-size="11" text-anchor="middle" fill="#333">5</text>
   <text x="128" y="394" font-size="11" fill="#666">시간</text>
+  <text x="165" y="394" font-size="11" fill="#c0392b">⚠ 그날 총 9h</text>
 
   <text x="16" y="422" font-size="12" fill="#444">08-13</text>
   <rect x="70" y="410" width="50" height="22" fill="#fff" stroke="#888"/>
   <text x="95" y="426" font-size="11" text-anchor="middle" fill="#333">2</text>
   <text x="128" y="422" font-size="11" fill="#666">시간</text>
 
-  <text x="16" y="452" font-size="12" font-weight="bold" fill="#333">합계: 10시간</text>
-  <text x="130" y="452" font-size="12" fill="#c0392b">⚠ 8시간 초과일 있음</text>
+  <text x="16" y="452" font-size="12" font-weight="bold" fill="#333">이 WBS 합계: 11시간</text>
 
   <line x1="0" y1="470" x2="420" y2="470" stroke="#ccc"/>
 

@@ -19,7 +19,8 @@
 - 권한 검증은 컨트롤러 레벨에서 명시적으로 처리(별도 권한 프레임워크/데코레이터 금지): 본인 글만 등록/수정/삭제 가능, 관리자는 등록/수정만 예외(타인 글도 가능)하고 **삭제는 관리자도 불가, 작성자 본인 한정**(도메인정의서 5절), 상태를 DONE으로 바꾸는 것은 관리자만 가능.
 - 모든 SQL은 예외 없이 `db/` 함수를 통해서만 실행(컨트롤러 직접 작성 금지) — "재사용 여부"를 매번 판단하지 않도록 기준을 단일화.
 - WBS 저장/수정은 트랜잭션으로 묶는다(`db/tx.js`의 `withTransaction` 한 곳). 시간 할당 수정은 기존 레코드 전량 삭제 후 재삽입 — 부분 실패로 WBS만 저장되고 시간이 누락되는 사고를 막기 위함.
-- DB로 해결되는 제약은 DB에 둔다: `time_allocations.wbs_id`는 `ON DELETE CASCADE`(도메인 4절 "WBS삭제됨→하위 시간 할당 함께 삭제"), `wbs`에 `CHECK (end_date >= start_date)`. 앱 코드로 다시 검증하지 않음.
+- DB로 해결되는 제약은 DB에 둔다: `time_allocations.wbs_id`는 `ON DELETE CASCADE`(도메인 4절 "WBS삭제됨→하위 시간 할당 함께 삭제"), `wbs`에 `CHECK (end_date >= start_date)`, `time_allocations`에 `UNIQUE(wbs_id, work_date)`. 앱 코드로 다시 검증하지 않음.
+- 테이블 간 제약이라 DB로 처리 안 되는 것은 컨트롤러에서 검증: `time_allocations.work_date`가 해당 WBS의 `start_date~end_date` 범위 내인지(도메인정의서 6절 데이터 품질 규칙).
 - 에러 응답은 `{ error: { code, message } }` 고정 포맷. 403(권한 없음)/400(검증 오류, 예: 종료일<시작일)만 구분해서 반환.
 
 **프론트엔드 (React 19)**
@@ -39,7 +40,7 @@
 
 ## 4. 테스트 / 품질 원칙
 
-- 1인 7일 일정 특성상 E2E/유닛 테스트 풀세트는 하지 않는다. **핵심 도메인 규칙**(권한 검증, 8시간 초과 경고, 상태 전이 권한)에 대해서만 supertest로 백엔드 API 레벨 테스트 최소 1개씩 작성, `backend/tests/*.test.js`에 배치(end_date ≥ start_date는 DB CHECK 제약이 처리하므로 별도 테스트 불필요).
+- 1인 7일 일정 특성상 E2E/유닛 테스트 풀세트는 하지 않는다. **핵심 도메인 규칙**(권한 검증, 8시간 초과 경고, 상태 전이 권한, work_date 범위 검증)에 대해서만 supertest로 백엔드 API 레벨 테스트 최소 1개씩 작성, `backend/tests/*.test.js`에 배치(end_date ≥ start_date, work_date 중복은 DB 제약이 처리하므로 별도 테스트 불필요).
 - 프론트는 별도 테스트 프레임워크 도입 없이, 7일차 "통합 테스트" 일정에서 수동 시나리오 검증(3-user-scenario.md 기준)으로 대체.
 - 린트/포맷은 기존 프로젝트 설정(ESLint/Prettier)만 사용, 규칙 커스터마이징 최소화.
 
