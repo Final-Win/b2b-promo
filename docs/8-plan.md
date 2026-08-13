@@ -180,21 +180,21 @@ flowchart LR
 - 선행: ENV-0
 - 작업: `docs/7-schema.sql`을 `backend/db/schema.sql`로 배치하고 적용. 3개 테이블, CHECK·UNIQUE·FK(CASCADE/RESTRICT) 제약, 인덱스 5개, `updated_at` 트리거 포함.
 - 완료 조건
-  - [ ] `psql -f backend/db/schema.sql` 이 오류 없이 실행됨
-  - [ ] 3개 테이블이 생성되고, `\di` 로 인덱스 5개가 확인됨
-  - [ ] `end_date < start_date` INSERT가 CHECK 제약으로 거부됨
-  - [ ] `hours = 0` 또는 `hours = 9` INSERT가 CHECK 제약으로 거부됨
-  - [ ] 같은 `(wbs_id, work_date)` 중복 INSERT가 UNIQUE 제약으로 거부됨
-  - [ ] WBS 1건 삭제 시 하위 time_allocations가 함께 삭제됨(CASCADE)
-  - [ ] wbs UPDATE 시 `updated_at`이 트리거로 자동 갱신됨
+  - [x] `psql -f backend/db/schema.sql` 이 오류 없이 실행됨
+  - [x] 3개 테이블이 생성되고, `\di` 로 인덱스 5개가 확인됨
+  - [x] `end_date < start_date` INSERT가 CHECK 제약으로 거부됨
+  - [x] `hours = 0` 또는 `hours = 9` INSERT가 CHECK 제약으로 거부됨
+  - [x] 같은 `(wbs_id, work_date)` 중복 INSERT가 UNIQUE 제약으로 거부됨
+  - [x] WBS 1건 삭제 시 하위 time_allocations가 함께 삭제됨(CASCADE)
+  - [x] wbs UPDATE 시 `updated_at`이 트리거로 자동 갱신됨
 
 ### DB-2. 시드 (관리자 + 성능 검증용 데이터)
 - 선행: DB-1
 - 작업: `backend/db/seed.sql`에 ① 관리자 계정 1건(`role='ADMIN'`, bcrypt 해시), ② 일반 회원 3건, ③ 성능 검증용 WBS 200건 + 시간 할당. 반복 실행 가능하도록 `ON CONFLICT (email) DO NOTHING` 적용. 해시 생성은 `node -e "console.log(require('bcrypt').hashSync('비밀번호',10))"`.
 - 완료 조건
-  - [ ] seed.sql 실행 후 `role='ADMIN'` 계정이 1건 존재하고, password가 bcrypt 해시로 저장됨
-  - [ ] seed.sql을 두 번 연속 실행해도 오류 없이 통과함
-  - [ ] WBS 200건 이상이 5주 범위에 걸쳐 생성됨(QA-1 성능 검증용)
+  - [x] seed.sql 실행 후 `role='ADMIN'` 계정이 1건 존재하고, password가 bcrypt 해시로 저장됨
+  - [x] seed.sql을 두 번 연속 실행해도 오류 없이 통과함
+  - [x] WBS 200건 이상이 5주 범위에 걸쳐 생성됨(QA-1 성능 검증용)
 
 ---
 
