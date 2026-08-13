@@ -1,0 +1,471 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Team WBS API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh_token"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VALIDATION_ERROR",
+                  "DUPLICATE_EMAIL",
+                  "UNAUTHORIZED",
+                  "FORBIDDEN",
+                  "NOT_FOUND"
+                ]
+              },
+              "message": { "type": "string" }
+            },
+            "required": ["code", "message"]
+          }
+        },
+        "required": ["error"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "email": { "type": "string", "format": "email", "maxLength": 100 },
+          "name": { "type": "string", "maxLength": 50 },
+          "role": { "type": "string", "enum": ["ADMIN", "USER"] }
+        },
+        "required": ["id", "email", "name", "role"]
+      },
+      "UserSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string", "maxLength": 50 },
+          "status": { "type": "string", "enum": ["ACTIVE", "WITHDRAWN"] }
+        },
+        "required": ["id", "name", "status"]
+      },
+      "TimeAllocation": {
+        "type": "object",
+        "properties": {
+          "work_date": { "type": "string", "format": "date" },
+          "hours": { "type": "integer", "minimum": 1, "maximum": 8 }
+        },
+        "required": ["work_date", "hours"]
+      },
+      "Wbs": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "writer_id": { "type": "integer" },
+          "writer_name": { "type": "string", "maxLength": 50 },
+          "writer_status": { "type": "string", "enum": ["ACTIVE", "WITHDRAWN"] },
+          "assignee_id": { "type": "integer" },
+          "assignee_name": { "type": "string", "maxLength": 50 },
+          "assignee_status": { "type": "string", "enum": ["ACTIVE", "WITHDRAWN"] },
+          "title": { "type": "string", "maxLength": 200 },
+          "content": { "type": "string", "nullable": true },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": "string", "format": "date" },
+          "status": {
+            "type": "string",
+            "enum": ["TODO", "IN_PROGRESS", "QA", "RESOLVED", "DONE"]
+          },
+          "time_allocations": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TimeAllocation" }
+          }
+        },
+        "required": [
+          "id", "writer_id", "writer_name", "writer_status",
+          "assignee_id", "assignee_name", "assignee_status",
+          "title", "start_date", "end_date", "status", "time_allocations"
+        ]
+      },
+      "WbsRequest": {
+        "type": "object",
+        "properties": {
+          "assignee_id": { "type": "integer" },
+          "title": { "type": "string", "maxLength": 200 },
+          "content": { "type": "string", "nullable": true },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": "string", "format": "date" },
+          "status": {
+            "type": "string",
+            "enum": ["TODO", "IN_PROGRESS", "QA", "RESOLVED", "DONE"]
+          },
+          "time_allocations": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TimeAllocation" }
+          }
+        },
+        "required": [
+          "assignee_id", "title", "start_date", "end_date", "status", "time_allocations"
+        ]
+      },
+      "DailySum": {
+        "type": "object",
+        "properties": {
+          "work_date": { "type": "string", "format": "date" },
+          "total_hours": { "type": "integer" }
+        },
+        "required": ["work_date", "total_hours"]
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "VALIDATION_ERROR",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "UNAUTHORIZED",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "FORBIDDEN",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "NOT_FOUND",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/auth/signup": {
+      "post": {
+        "summary": "회원가입",
+        "description": "인증 불필요. 이메일 형식 오류·필수값 누락은 400, 이메일 중복은 400 DUPLICATE_EMAIL",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email", "maxLength": 100 },
+                  "password": { "type": "string", "maxLength": 255 },
+                  "name": { "type": "string", "maxLength": 50 }
+                },
+                "required": ["email", "password", "name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "회원가입 성공",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "로그인",
+        "description": "인증 불필요. 탈퇴 계정 또는 자격 증명 불일치는 401 UNAUTHORIZED",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email", "maxLength": 100 },
+                  "password": { "type": "string", "maxLength": 255 }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "로그인 성공, refresh_token은 httpOnly 쿠키로 전달됨",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  },
+                  "required": ["access_token", "user"]
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "액세스 토큰 재발급",
+        "description": "httpOnly refresh 쿠키만으로 재발급. 토큰 없음/만료/token_version 불일치는 401",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "재발급 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  },
+                  "required": ["access_token", "user"]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "로그아웃",
+        "description": "본인만 호출 가능(토큰 소유자). token_version +1로 기존 refresh token 무효화",
+        "responses": {
+          "200": { "description": "로그아웃 성공" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "내 정보 조회 (마이페이지)",
+        "description": "본인만 조회 가능(토큰 소유자)",
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "summary": "회원 탈퇴",
+        "description": "본인만 탈퇴 가능(토큰 소유자). status='WITHDRAWN' 전환, token_version +1",
+        "responses": {
+          "200": { "description": "탈퇴 성공" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "담당자 선택 목록 조회",
+        "description": "로그인한 회원이면 누구나 조회 가능",
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserSummary" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wbs": {
+      "get": {
+        "summary": "WBS 목록 조회 (캘린더 5주 뷰 또는 내 WBS관리 탭)",
+        "description": "로그인한 회원이면 누구나 조회 가능. from/to는 캘린더 5주 조회, mine=true는 기간 무관 본인 목록 조회",
+        "parameters": [
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "mine", "in": "query", "schema": { "type": "boolean" } },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["TODO", "IN_PROGRESS", "QA", "RESOLVED", "DONE"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Wbs" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "WBS 등록",
+        "description": "로그인한 회원이면 누구나 등록 가능. 등록 시 상태는 TODO로 초기화됨",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WbsRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "등록 성공",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Wbs" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wbs/{id}": {
+      "get": {
+        "summary": "WBS 단건 조회 (상세패널)",
+        "description": "로그인한 회원이면 누구나 조회 가능",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Wbs" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "WBS 수정 (전체 필드 치환, 상태 변경도 이 경로)",
+        "description": "작성자 본인 또는 관리자만 수정 가능. DONE 전이는 관리자만 가능",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WbsRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "수정 성공",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Wbs" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "summary": "WBS 삭제",
+        "description": "작성자 본인만 삭제 가능(관리자도 불가)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "삭제 성공" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/time-allocations/daily-sum": {
+      "get": {
+        "summary": "일자별 시간 합계 조회 (8시간 초과 경고용, assignee_id 기준)",
+        "description": "로그인 필요, 담당자 지정을 위해 타인 user_id 조회도 허용",
+        "parameters": [
+          { "name": "user_id", "in": "query", "required": true, "schema": { "type": "integer" } },
+          { "name": "from", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/DailySum" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    }
+  }
+}
