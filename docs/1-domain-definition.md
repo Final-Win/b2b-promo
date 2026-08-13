@@ -57,6 +57,7 @@
 | 상태 | status | VARCHAR | 20 | Y | ACTIVE | ACTIVE, WITHDRAWN | - | 탈퇴 여부 |
 | 가입일시 | created_at | DATETIME | - | Y | now() | - | - | 회원가입 시각 |
 | 탈퇴일시 | withdrawn_at | DATETIME | - | N | NULL | - | - | 탈퇴 처리 시각 |
+| 토큰버전 | token_version | INT | - | Y | 0 | - | 로그아웃/탈퇴 시 +1 | Refresh Token 무효화 기준값(발급 시점 버전과 다르면 재발급 거부) |
 
 ### 엔티티: WBS (업무)
 
