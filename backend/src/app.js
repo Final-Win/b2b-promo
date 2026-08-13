@@ -3,6 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const routes = require('./routes/auth.routes');
+const wbsRoutes = require('./routes/wbs.routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 app.use(routes);
+app.use(wbsRoutes);
 
 app.use(errorHandler);
 

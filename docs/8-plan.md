@@ -235,17 +235,17 @@ flowchart LR
   - 컨트롤러 검증: `work_date`가 해당 WBS의 `start_date ~ end_date` 범위 내인지
   - **권한은 이 단계에서 "본인 글만 수정/삭제"까지 구현**하고(`writer_id = req.user.id`), 관리자 예외는 BE-3에서 분기만 추가한다
 - 완료 조건
-  - [ ] WBS 등록 시 상태가 `TODO`로 초기화되고 `time_allocations`가 같은 트랜잭션에서 함께 저장됨
-  - [ ] WBS 수정 시 기존 시간 할당이 전량 교체되고, 시간 할당 삽입을 일부러 실패시키면 WBS 변경도 롤백됨(DB 조회로 확인)
-  - [ ] `work_date`가 WBS 기간을 벗어나면 400 `VALIDATION_ERROR` 반환
-  - [ ] 존재하지 않는 WBS id로 `PUT`/`DELETE` 호출 시 404 `NOT_FOUND` 반환
-  - [ ] WBS 삭제 시 하위 시간 할당도 함께 사라짐
-  - [ ] `GET /wbs?from&to`가 5주 범위와 겹치는 WBS만 반환함
-  - [ ] `GET /wbs?mine=true&status=TODO`가 기간과 무관하게 본인 WBS를 상태별로 반환함
-  - [ ] `from`/`to`/`mine`을 모두 생략한 `GET /wbs`가 400 `VALIDATION_ERROR`를 반환함
-  - [ ] `PUT`에 빈 `time_allocations` 배열을 보내면 해당 WBS의 시간 할당이 전부 삭제됨
-  - [ ] 응답에 `writer_id`, `writer_status`, `assignee_status`가 포함됨
-  - [ ] 일반 회원이 타인 글 수정/삭제를 시도하면 403 `FORBIDDEN` 반환
+  - [x] WBS 등록 시 상태가 `TODO`로 초기화되고 `time_allocations`가 같은 트랜잭션에서 함께 저장됨
+  - [x] WBS 수정 시 기존 시간 할당이 전량 교체되고, 시간 할당 삽입을 일부러 실패시키면 WBS 변경도 롤백됨(DB 조회로 확인)
+  - [x] `work_date`가 WBS 기간을 벗어나면 400 `VALIDATION_ERROR` 반환
+  - [x] 존재하지 않는 WBS id로 `PUT`/`DELETE` 호출 시 404 `NOT_FOUND` 반환
+  - [x] WBS 삭제 시 하위 시간 할당도 함께 사라짐
+  - [x] `GET /wbs?from&to`가 5주 범위와 겹치는 WBS만 반환함
+  - [x] `GET /wbs?mine=true&status=TODO`가 기간과 무관하게 본인 WBS를 상태별로 반환함
+  - [x] `from`/`to`/`mine`을 모두 생략한 `GET /wbs`가 400 `VALIDATION_ERROR`를 반환함
+  - [x] `PUT`에 빈 `time_allocations` 배열을 보내면 해당 WBS의 시간 할당이 전부 삭제됨
+  - [x] 응답에 `writer_id`, `writer_status`, `assignee_status`가 포함됨
+  - [x] 일반 회원이 타인 글 수정/삭제를 시도하면 403 `FORBIDDEN` 반환
 
 ### BE-3. 관리자 예외 + DONE 전이
 - 선행: BE-2, DB-2
