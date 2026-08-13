@@ -22,7 +22,7 @@
 - DB로 해결되는 제약은 DB에 둔다: `time_allocations.wbs_id`는 `ON DELETE CASCADE`(도메인 4절 "WBS삭제됨→하위 시간 할당 함께 삭제"), `wbs`에 `CHECK (end_date >= start_date)`, `time_allocations`에 `UNIQUE(wbs_id, work_date)`. 앱 코드로 다시 검증하지 않음.
 - 테이블 간 제약이라 DB로 처리 안 되는 것은 컨트롤러에서 검증: `time_allocations.work_date`가 해당 WBS의 `start_date~end_date` 범위 내인지(도메인정의서 6절 데이터 품질 규칙).
 - 에러 응답은 `{ error: { code, message } }` 고정 포맷. 상태코드는 401(인증 실패)/403(권한 없음)/400(검증 오류, 예: 종료일<시작일)/404(없는 리소스)만 사용. `code` 값 목록은 8-plan.md 4절 표를 따른다.
-- CORS는 `cors({ origin: 프론트 주소, credentials: true })`. refresh 쿠키는 `httpOnly`, `SameSite=Lax`, 로컬은 `secure=false`.
+- CORS는 `cors({ origin: 프론트 주소, credentials: true })`. refresh 쿠키는 이름 `refresh_token`, `httpOnly`, `SameSite=Lax`, 로컬은 `secure=false`.
 
 **프론트엔드 (React 19)**
 - 계층 순서는 `pages → features → api → shared`. 상위 계층은 자신과 하위 계층을 import할 수 있고, 역방향(하위가 상위를 import)은 금지.
@@ -38,7 +38,7 @@
 - 파일명은 도메인 용어 그대로: `wbs.controller.js`, `wbsApi.ts`, `TimeAllocationInput.tsx` 등. 축약어·범용 이름(`utils2.js`, `helper.js`) 지양.
 - 타입/인터페이스는 실제로 여러 곳에서 쓰이는 것만 정의. 백엔드는 JS, 프론트는 TS(구조 예시가 `.tsx/.ts` 기준).
 - 요청/응답 필드명은 배열 키까지 전부 snake_case로 통일한다(`time_allocations`, `work_date`, `user_id`). camelCase 예외를 두지 않는다 — 매핑 레이어를 만들지 않기 위한 규칙이므로 예외가 생기면 규칙 자체가 무의미해진다.
-- 회원별 일자 시간 합계(8시간 초과 경고)는 서버가 `assignee_id` 기준으로 계산해 반환하고, 프론트는 받은 값에 현재 편집 중인 미저장 입력값만 더해 표시한다. 전용 조회 `GET /time-allocations/daily-sum?user_id&from&to`를 두고, 저장 자체는 WBS 등록/수정 요청 바디에 `time_allocations` 배열을 포함해 한 번에 처리(별도 등록 API 불필요).
+- 회원별 일자 시간 합계(8시간 초과 경고)는 서버가 `assignee_id` 기준으로 계산해 반환한다. 이 합계에는 **편집 중인 WBS의 기존 저장분도 포함**되므로, 프론트는 `서버 합계 − 이 WBS의 기존 저장값 + 현재 미저장 입력값 > 8` 로 판정한다(그냥 더하면 수정 모드에서 이중 계산된다). 전용 조회 `GET /time-allocations/daily-sum?user_id&from&to`를 두고, 저장 자체는 WBS 등록/수정 요청 바디에 `time_allocations` 배열을 포함해 한 번에 처리(별도 등록 API 불필요).
 - 탈퇴 회원 표기는 서버가 `writer_status`/`assignee_status`만 내려주고 `"(탈퇴)"` 문자열 합성은 프론트가 담당한다(서버에서 문자열을 가공하지 않음).
 - 반응형 레이아웃은 별도 CSS 프레임워크 추가 없이 CSS 기본 미디어 쿼리로 처리(캘린더는 가로 스크롤 허용, 상세패널은 좁은 화면에서 하단 시트로 전환).
 

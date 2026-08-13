@@ -114,20 +114,23 @@ flowchart LR
 
 | 엔드포인트 | 용도 | 요청 / 응답 |
 |---|---|---|
-| `POST /auth/signup` | 회원가입 | `{ email, password, name }` |
-| `POST /auth/login` | 로그인 | → `{ access_token, user: { id, email, name, role } }` + refresh 쿠키 |
+| `POST /auth/signup` | 회원가입 | `{ email, password, name }` → `{ id, email, name, role }` (토큰 없음 → 로그인 화면으로) |
+| `POST /auth/login` | 로그인 | → `{ access_token, user: { id, email, name, role } }` + refresh 쿠키(`refresh_token`) |
 | `POST /auth/refresh` | 재발급 | 쿠키만 → `{ access_token, user }` |
 | `POST /auth/logout` | 로그아웃 | `token_version` +1 |
 | `DELETE /auth/me` | 탈퇴 | `status='WITHDRAWN'`, `token_version` +1 |
 | `GET /auth/me` | 내 정보(마이페이지) | → `{ id, email, name, role }` |
 | `GET /users` | 담당자 선택 목록 | → `[{ id, name, status }]` |
 | `GET /wbs?from&to` | 캘린더 5주 조회 | → 아래 WBS 객체 배열 |
-| `GET /wbs?mine=true&status=` | 내 WBS관리 탭(기간 무관) | → 같은 형태, `status` 생략 시 전체 |
+| `GET /wbs?mine=true&status=` | 내 WBS관리 탭(기간 무관, `from`/`to` 무시) | → 같은 형태, `status` 생략 시 전체 |
 | `GET /wbs/:id` | 상세패널 단건 조회 | → WBS 객체 1건 |
 | `POST /wbs` | 등록 | 아래 요청 바디 |
 | `PUT /wbs/:id` | 수정(**전체 필드 치환**, 상태 변경도 이 경로) | 아래 요청 바디 |
 | `DELETE /wbs/:id` | 삭제 | |
-| `GET /time-allocations/daily-sum?user_id&from&to` | 8h 초과 경고용 (**assignee_id 기준** 합산) | → `[{ work_date, total_hours }]` |
+| `GET /time-allocations/daily-sum?user_id&from&to` | 8h 초과 경고용 (**assignee_id 기준** 합산) | → `[{ work_date, total_hours }]` — 편집 중인 WBS의 기존 저장분도 **포함**된 값 |
+
+`from`/`to`/`mine`을 모두 생략한 `GET /wbs`는 400. `PUT`의 `time_allocations`는 기존 레코드를 전량 대체하므로 빈 배열을 보내면 시간 할당이 모두 삭제된다.
+전체 스펙은 [swagger.json](./swagger.json) 참고.
 
 **WBS 응답 객체**
 ```json
@@ -239,6 +242,8 @@ flowchart LR
   - [ ] WBS 삭제 시 하위 시간 할당도 함께 사라짐
   - [ ] `GET /wbs?from&to`가 5주 범위와 겹치는 WBS만 반환함
   - [ ] `GET /wbs?mine=true&status=TODO`가 기간과 무관하게 본인 WBS를 상태별로 반환함
+  - [ ] `from`/`to`/`mine`을 모두 생략한 `GET /wbs`가 400 `VALIDATION_ERROR`를 반환함
+  - [ ] `PUT`에 빈 `time_allocations` 배열을 보내면 해당 WBS의 시간 할당이 전부 삭제됨
   - [ ] 응답에 `writer_id`, `writer_status`, `assignee_status`가 포함됨
   - [ ] 일반 회원이 타인 글 수정/삭제를 시도하면 403 `FORBIDDEN` 반환
 
