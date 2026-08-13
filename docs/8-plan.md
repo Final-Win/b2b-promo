@@ -213,17 +213,17 @@ flowchart LR
   - 회원 관련 SQL은 `db/users.db.js`에만 작성
   - 환경변수 `.env` + `.env.example` (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `PORT`, `CORS_ORIGIN`)
 - 완료 조건
-  - [ ] 회원가입 시 비밀번호가 bcrypt로 해시되어 저장되고, 이메일 형식 오류는 `VALIDATION_ERROR`(400), 중복은 `DUPLICATE_EMAIL`(400)로 거부됨
-  - [ ] 로그인 성공 시 access token(응답 바디) + refresh token(httpOnly 쿠키)이 발급됨
-  - [ ] 만료된 access token으로 요청 시 401 `UNAUTHORIZED` 반환
-  - [ ] `/auth/refresh`가 쿠키의 refresh token으로 신규 access token을 발급함
-  - [ ] 로그아웃/탈퇴 후 기존 refresh token으로 재발급 시도하면 `token_version` 불일치로 401 거부됨
-  - [ ] 탈퇴 계정(`status='WITHDRAWN'`)으로 로그인 시 401 반환
-  - [ ] `GET /auth/me`가 `{ id, email, name, role }`을 반환함
-  - [ ] `GET /users`가 담당자 선택용 `[{ id, name, status }]`를 반환함
-  - [ ] 모든 4xx/5xx 응답이 `{ error: { code, message } }` 포맷을 따름
-  - [ ] 브라우저에서 다른 포트의 프론트가 쿠키를 포함한 요청을 보내도 CORS 오류 없이 통과함
-  - [ ] `.env`가 커밋되지 않고 `.env.example`만 저장소에 있음
+  - [x] 회원가입 시 비밀번호가 bcrypt로 해시되어 저장되고, 이메일 형식 오류는 `VALIDATION_ERROR`(400), 중복은 `DUPLICATE_EMAIL`(400)로 거부됨
+  - [x] 로그인 성공 시 access token(응답 바디) + refresh token(httpOnly 쿠키)이 발급됨
+  - [x] 만료된 access token으로 요청 시 401 `UNAUTHORIZED` 반환
+  - [x] `/auth/refresh`가 쿠키의 refresh token으로 신규 access token을 발급함
+  - [x] 로그아웃/탈퇴 후 기존 refresh token으로 재발급 시도하면 `token_version` 불일치로 401 거부됨
+  - [x] 탈퇴 계정(`status='WITHDRAWN'`)으로 로그인 시 401 반환
+  - [x] `GET /auth/me`가 `{ id, email, name, role }`을 반환함
+  - [x] `GET /users`가 담당자 선택용 `[{ id, name, status }]`를 반환함
+  - [x] 모든 4xx/5xx 응답이 `{ error: { code, message } }` 포맷을 따름
+  - [x] 브라우저에서 다른 포트의 프론트가 쿠키를 포함한 요청을 보내도 CORS 오류 없이 통과함
+  - [x] `.env`가 커밋되지 않고 `.env.example`만 저장소에 있음
 
 ### BE-2. WBS CRUD + 시간 할당 저장
 - 선행: BE-1
