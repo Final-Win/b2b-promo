@@ -33,4 +33,17 @@ async function insertMany(client, wbsId, allocations) {
   }
 }
 
-module.exports = { listByWbsId, listByWbsIds, deleteByWbsId, insertMany };
+async function sumByAssignee(assigneeId, from, to) {
+  const { rows } = await pool.query(
+    `SELECT time_allocations.work_date, SUM(time_allocations.hours)::int AS total_hours
+     FROM time_allocations
+     JOIN wbs ON wbs.id = time_allocations.wbs_id
+     WHERE wbs.assignee_id = $1 AND time_allocations.work_date BETWEEN $2 AND $3
+     GROUP BY time_allocations.work_date
+     ORDER BY time_allocations.work_date`,
+    [assigneeId, from, to]
+  );
+  return rows;
+}
+
+module.exports = { listByWbsId, listByWbsIds, deleteByWbsId, insertMany, sumByAssignee };
