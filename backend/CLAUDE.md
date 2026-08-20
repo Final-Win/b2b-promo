@@ -2,8 +2,9 @@
 
 ## 반드시 준수할 사항
 
-- SOLID 원칙을 반드시 지킬 것
-- Clean 아키텍쳐를 반드시 구현할 것
+- 아키텍처/레이어 구조는 `../docs/4-project-principle.md`를 따른다: `routes → controller → db` 3단 레이어만 사용하고, 서비스/리포지토리/DTO/Use Case 같은 추가 계층을 두지 않는다(1인 개발·소규모 사내 도구 규모에 맞춘 결정).
+- 하드코딩 금지: 상태값·역할 등 반복되는 리터럴(`'ADMIN'`, `'DONE'`, `'WITHDRAWN'` 등)은 `src/utils/constants.js`에 상수로 정의해 참조한다.
+- 에러 응답은 항상 `{ error: { code, message } }` 고정 포맷과 `../docs/8-plan.md` 4절의 code 목록만 사용한다. DB 드라이버가 던진 원본 에러(SQLSTATE, 제약명 등)를 그대로 클라이언트에 노출하지 않는다.
 
 ## 참조 문서
 

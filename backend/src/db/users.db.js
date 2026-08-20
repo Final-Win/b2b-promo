@@ -6,7 +6,11 @@ async function findByEmail(email) {
 }
 
 async function findById(id) {
-  const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+  // 비밀번호 해시가 필요 없는 조회(me, refresh)에만 쓰이므로 password는 제외한다.
+  const { rows } = await pool.query(
+    'SELECT id, email, name, role, status, token_version FROM users WHERE id = $1',
+    [id]
+  );
   return rows[0] || null;
 }
 

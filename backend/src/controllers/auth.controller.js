@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
 const usersDb = require('../db/users.db');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
-const { EMAIL_REGEX } = require('../utils/constants');
+const { EMAIL_REGEX, USER_STATUSES } = require('../utils/constants');
 
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   sameSite: 'lax',
-  secure: false,
+  secure: process.env.NODE_ENV === 'production',
   maxAge: 14 * 24 * 60 * 60 * 1000,
 };
 
@@ -45,7 +45,7 @@ async function login(req, res, next) {
     }
 
     const user = await usersDb.findByEmail(email);
-    if (!user || user.status === 'WITHDRAWN') {
+    if (!user || user.status === USER_STATUSES.WITHDRAWN) {
       return next(unauthorized);
     }
 
@@ -123,4 +123,13 @@ async function withdraw(req, res, next) {
   }
 }
 
-module.exports = { signup, login, refresh, logout, me, withdraw };
+async function listUsers(req, res, next) {
+  try {
+    const users = await usersDb.listUsers();
+    res.status(200).json(users);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { signup, login, refresh, logout, me, withdraw, listUsers };

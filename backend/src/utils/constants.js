@@ -1,4 +1,8 @@
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const WBS_STATUSES = ['TODO', 'IN_PROGRESS', 'QA', 'RESOLVED', 'DONE'];
 
-module.exports = { EMAIL_REGEX, WBS_STATUSES };
+const ROLES = { ADMIN: 'ADMIN', USER: 'USER' };
+const USER_STATUSES = { ACTIVE: 'ACTIVE', WITHDRAWN: 'WITHDRAWN' };
+const DONE_STATUS = 'DONE';
+
+module.exports = { EMAIL_REGEX, WBS_STATUSES, ROLES, USER_STATUSES, DONE_STATUS };
