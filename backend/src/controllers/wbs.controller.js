@@ -109,7 +109,7 @@ async function update(req, res, next) {
     if (!existing) {
       return next({ status: 404, code: 'NOT_FOUND', message: '존재하지 않는 WBS입니다' });
     }
-    if (existing.writer_id !== req.user.id) {
+    if (existing.writer_id !== req.user.id && req.user.role !== 'ADMIN') {
       return next({ status: 403, code: 'FORBIDDEN', message: '권한이 없습니다' });
     }
 
@@ -121,6 +121,9 @@ async function update(req, res, next) {
     const { assignee_id, title, content, start_date, end_date, status, time_allocations } = req.body;
     if (!WBS_STATUSES.includes(status)) {
       return next({ status: 400, code: 'VALIDATION_ERROR', message: '입력값이 올바르지 않습니다' });
+    }
+    if (status === 'DONE' && req.user.role !== 'ADMIN') {
+      return next({ status: 403, code: 'FORBIDDEN', message: 'DONE 상태 변경은 관리자만 가능합니다' });
     }
 
     const id = req.params.id;
