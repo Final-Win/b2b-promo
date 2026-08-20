@@ -23,13 +23,14 @@ export default function MyPage() {
       <h1>마이페이지</h1>
       <p>이름: {user?.name}</p>
       <p>이메일: {user?.email}</p>
-      <button onClick={handleLogout} disabled={logout.isPending}>
+      <button className="btn" onClick={handleLogout} disabled={logout.isPending}>
         로그아웃
       </button>
       <button
+        className="btn danger-outline"
         onClick={handleWithdraw}
         disabled={withdraw.isPending}
-        style={{ marginLeft: 12, color: 'red' }}
+        style={{ marginLeft: 12 }}
       >
         회원 탈퇴
       </button>

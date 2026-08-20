@@ -78,7 +78,7 @@ export default function CalendarGrid({ weekOffset }: CalendarGridProps) {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, minmax(90px, 1fr))',
                 gridAutoRows: 'auto',
-                borderTop: '1px solid #e5e7eb',
+                borderTop: '1px solid var(--color-line)',
               }}
             >
               {week.map((day, i) => {
@@ -104,8 +104,8 @@ export default function CalendarGrid({ weekOffset }: CalendarGridProps) {
                       gridRow: '1 / span 999',
                       padding: 4,
                       fontWeight: dayISO === todayISO ? 'bold' : 'normal',
-                      color: dayISO === todayISO ? '#2563eb' : undefined,
-                      background: isInDragRange(dayISO) ? '#dbeafe' : undefined,
+                      color: dayISO === todayISO ? 'var(--color-primary-700)' : undefined,
+                      background: isInDragRange(dayISO) ? 'var(--color-primary-100)' : undefined,
                       userSelect: 'none',
                       cursor: 'pointer',
                     }}

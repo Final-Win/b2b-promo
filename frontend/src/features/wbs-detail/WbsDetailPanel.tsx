@@ -153,16 +153,16 @@ export default function WbsDetailPanel() {
   }
 
   return (
-    <div className="wbs-detail-panel">
+    <div className="wbs-detail-panel panel">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: 16, margin: 0 }}>{mode === 'create' ? 'WBS 등록' : 'WBS 상세'}</h2>
-        <button onClick={close}>닫기</button>
+        <button className="btn" onClick={close}>닫기</button>
       </div>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="field-error">{error}</p>}
 
       {mode === 'edit' && wbs && (
-        <p style={{ fontSize: 12, color: '#666' }}>
+        <p style={{ fontSize: 12, color: 'var(--color-sub)' }}>
           작성자: {wbs.writer_name}
           {withdrawnSuffix(wbs.writer_status)} / 담당자: {wbs.assignee_name}
           {withdrawnSuffix(wbs.assignee_status)}
@@ -228,15 +228,19 @@ export default function WbsDetailPanel() {
               value={hoursByDate[d] ?? ''}
               onChange={(e) => setHoursByDate({ ...hoursByDate, [d]: e.target.value })}
             />
-            {isOverLimit(d) && <span style={{ color: 'orange' }}>⚠ 8시간 초과</span>}
+            {isOverLimit(d) && <span className="warn-inline">⚠ 8시간 초과</span>}
           </div>
         ))}
         <p>이 WBS 합계: {localTotal}시간</p>
       </div>
 
       <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={handleSave}>저장</button>
-        {isWriter && <button onClick={handleDelete}>삭제</button>}
+        <button className="btn primary" onClick={handleSave}>저장</button>
+        {isWriter && (
+          <button className="btn danger-outline" onClick={handleDelete}>
+            삭제
+          </button>
+        )}
       </div>
     </div>
   );

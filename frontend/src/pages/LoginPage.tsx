@@ -30,7 +30,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{ display: 'block', width: '100%' }}
+              style={{ width: '100%' }}
             />
           </label>
         </div>
@@ -42,16 +42,16 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{ display: 'block', width: '100%' }}
+              style={{ width: '100%' }}
             />
           </label>
         </div>
         {login.isError && (
-          <p style={{ color: 'red' }}>
+          <p className="field-error">
             {login.error instanceof ApiError ? login.error.message : '로그인에 실패했습니다.'}
           </p>
         )}
-        <button type="submit" disabled={login.isPending} style={{ marginTop: 12 }}>
+        <button type="submit" className="btn primary" disabled={login.isPending} style={{ marginTop: 12, width: '100%' }}>
           로그인
         </button>
       </form>

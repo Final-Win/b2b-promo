@@ -19,11 +19,18 @@ export default function CalendarPage() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', padding: 16 }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <h1 style={{ margin: 0, fontSize: 18 }}>{TEAM_NAME}</h1>
-        <button onClick={() => setWeekOffset((o) => o - 1)}>이전주</button>
-        <span style={{ fontWeight: 'bold', minWidth: 100, textAlign: 'center' }}>{monthLabel}</span>
-        <button onClick={() => setWeekOffset((o) => o + 1)}>다음주</button>
+      <header
+        className="topbar"
+        style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '12px 16px' }}
+      >
+        <h1 style={{ margin: 0, fontSize: 18, color: '#fff' }}>{TEAM_NAME}</h1>
+        <button className="btn" onClick={() => setWeekOffset((o) => o - 1)}>
+          이전주
+        </button>
+        <span style={{ fontWeight: 800, minWidth: 100, textAlign: 'center' }}>{monthLabel}</span>
+        <button className="btn" onClick={() => setWeekOffset((o) => o + 1)}>
+          다음주
+        </button>
         <Link to="/me" style={{ marginLeft: 'auto' }}>
           마이페이지
         </Link>
@@ -32,7 +39,8 @@ export default function CalendarPage() {
       <CalendarGrid weekOffset={weekOffset} />
 
       <button
-        style={{ position: 'fixed', right: 24, bottom: 24, padding: '10px 16px', borderRadius: 8 }}
+        className="btn primary"
+        style={{ position: 'fixed', right: 24, bottom: 24, borderRadius: 'var(--radius-pill)', boxShadow: 'var(--shadow-card)' }}
         onClick={() => setIsMyWbsOpen((o) => !o)}
       >
         내 WBS관리 탭

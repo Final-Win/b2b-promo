@@ -31,7 +31,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              style={{ display: 'block', width: '100%' }}
+              style={{ width: '100%' }}
             />
           </label>
         </div>
@@ -43,7 +43,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{ display: 'block', width: '100%' }}
+              style={{ width: '100%' }}
             />
           </label>
         </div>
@@ -55,16 +55,16 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{ display: 'block', width: '100%' }}
+              style={{ width: '100%' }}
             />
           </label>
         </div>
         {signup.isError && (
-          <p style={{ color: 'red' }}>
+          <p className="field-error">
             {signup.error instanceof ApiError ? signup.error.message : '회원가입에 실패했습니다.'}
           </p>
         )}
-        <button type="submit" disabled={signup.isPending} style={{ marginTop: 12 }}>
+        <button type="submit" className="btn primary" disabled={signup.isPending} style={{ marginTop: 12, width: '100%' }}>
           가입하기
         </button>
       </form>
