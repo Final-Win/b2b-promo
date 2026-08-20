@@ -84,6 +84,10 @@ export default function CalendarGrid({ weekOffset }: CalendarGridProps) {
               {week.map((day, i) => {
                 const dayISO = toISO(day);
                 return (
+                  // 날짜 셀을 이 주(week)의 전체 행 범위(1 / -1)에 걸쳐 깔아서
+                  // 막대가 빼곡히 채워져 있어도 막대 사이/뒤 빈 공간이면 어디를 눌러도
+                  // 드래그가 시작되도록 한다. 막대는 이후 DOM 순서로 그 위에 그려져
+                  // 막대 자체를 클릭하면 막대의 onClick(상세 열람)이 우선한다.
                   <div
                     key={dayISO}
                     onMouseDown={() => {
@@ -95,7 +99,9 @@ export default function CalendarGrid({ weekOffset }: CalendarGridProps) {
                     }}
                     style={{
                       gridColumn: i + 1,
-                      gridRow: 1,
+                      // '-1'은 명시적 그리드 끝을 가리켜 auto로 추가되는 막대 행들을
+                      // 안정적으로 덮지 못할 수 있어, 충분히 큰 span으로 전체를 덮는다.
+                      gridRow: '1 / span 999',
                       padding: 4,
                       fontWeight: dayISO === todayISO ? 'bold' : 'normal',
                       color: dayISO === todayISO ? '#2563eb' : undefined,
