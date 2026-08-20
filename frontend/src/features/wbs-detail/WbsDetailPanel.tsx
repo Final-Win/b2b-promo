@@ -40,7 +40,7 @@ function withdrawnSuffix(status: string) {
 }
 
 export default function WbsDetailPanel() {
-  const { isOpen, wbsId, mode, close } = useWbsPanelStore();
+  const { isOpen, wbsId, mode, initialStartDate, initialEndDate, close } = useWbsPanelStore();
   const { data: me } = useMe(isOpen);
   const { data: users } = useUsers();
   const { data: wbs } = useWbs(mode === 'edit' ? wbsId : null);
@@ -72,14 +72,14 @@ export default function WbsDetailPanel() {
     } else if (mode === 'create') {
       setTitle('');
       setAssigneeId('');
-      setStartDate(todayStr());
-      setEndDate(todayStr());
+      setStartDate(initialStartDate ?? todayStr());
+      setEndDate(initialEndDate ?? todayStr());
       setStatus('TODO');
       setContent('');
       setHoursByDate({});
     }
     setError(null);
-  }, [isOpen, mode, wbs]);
+  }, [isOpen, mode, wbs, initialStartDate, initialEndDate]);
 
   const { data: dailySums } = useDailySum(
     typeof assigneeId === 'number' ? assigneeId : null,
