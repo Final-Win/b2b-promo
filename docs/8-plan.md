@@ -188,13 +188,14 @@ flowchart LR
   - [x] WBS 1건 삭제 시 하위 time_allocations가 함께 삭제됨(CASCADE)
   - [x] wbs UPDATE 시 `updated_at`이 트리거로 자동 갱신됨
 
-### DB-2. 시드 (관리자 + 성능 검증용 데이터)
+### DB-2. 시드 (관리자 + 데모 데이터)
 - 선행: DB-1
-- 작업: `backend/db/seed.sql`에 ① 관리자 계정 1건(`role='ADMIN'`, bcrypt 해시), ② 일반 회원 3건, ③ 성능 검증용 WBS 200건 + 시간 할당. 반복 실행 가능하도록 `ON CONFLICT (email) DO NOTHING` 적용. 해시 생성은 `node -e "console.log(require('bcrypt').hashSync('비밀번호',10))"`.
+- 작업: `backend/db/seed.sql`에 ① 관리자 계정 1건(`role='ADMIN'`, bcrypt 해시), ② 일반 회원 3건, ③ 데모용 WBS 1건 + 시간 할당. 반복 실행 가능하도록 `ON CONFLICT (email) DO NOTHING` 적용. 해시 생성은 `node -e "console.log(require('bcrypt').hashSync('비밀번호',10))"`.
+- **변경(2026-08-20, 사용자 피드백)**: 캘린더가 가짜 WBS로 빼곡히 채워져 화면 확인이 어렵다는 피드백에 따라 데모 데이터를 200건 → 1건으로 축소. `generate_series(1, 200)`를 `generate_series(1, 1)`로 변경(`s.n`의 범위 상수만 바꾸면 다시 늘릴 수 있음).
 - 완료 조건
   - [x] seed.sql 실행 후 `role='ADMIN'` 계정이 1건 존재하고, password가 bcrypt 해시로 저장됨
   - [x] seed.sql을 두 번 연속 실행해도 오류 없이 통과함
-  - [x] WBS 200건 이상이 5주 범위에 걸쳐 생성됨(QA-1 성능 검증용)
+  - [ ] ~~WBS 200건 이상이 5주 범위에 걸쳐 생성됨~~ — 데모 데이터를 1건으로 축소하며 폐기. QA-1 성능 검증(5주 조회 1초 이내) 시에는 `seed.sql`의 `generate_series(1, 1)`을 `generate_series(1, 200)`으로 임시로 늘려 별도 검증하고 되돌린다.
 
 ---
 

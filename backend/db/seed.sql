@@ -15,17 +15,19 @@ VALUES
   ('carol@teamwbs.local', '$2b$10$wA6VCRzcmuD/0MxlgjDhL.pCP3E78nwGb8WG3GjOzuEiam.qBDZSq', '캐롤')
 ON CONFLICT (email) DO NOTHING;
 
--- ③ 성능 검증용 WBS 200건 (오늘 기준 ±4주 범위에 분산) + 일자별 시간 할당
+-- ③ 데모용 WBS 1건(캘린더 화면에 예시 막대 하나만 노출)
+-- QA-1 성능 검증(5주 조회 1초 이내, 200건 기준)이 필요할 때는 이 범위(1)를
+-- 임시로 늘려서 별도로 검증하고, 검증 후 다시 1로 되돌린다.
 INSERT INTO wbs (writer_id, assignee_id, title, content, start_date, end_date, status)
 SELECT
   w_user.id,
   a_user.id,
   'seed WBS #' || s.n,
-  'DB-2 성능 검증용 시드 데이터',
+  'DB-2 데모용 시드 데이터',
   (CURRENT_DATE - 28 + ((s.n * 3) % 56)),
   (CURRENT_DATE - 28 + ((s.n * 3) % 56)) + (1 + (s.n % 3)),
   (ARRAY['TODO', 'IN_PROGRESS', 'QA', 'RESOLVED', 'DONE'])[1 + (s.n % 5)]
-FROM generate_series(1, 200) AS s(n)
+FROM generate_series(1, 1) AS s(n)
 JOIN LATERAL (
   SELECT id FROM users WHERE role = 'USER' ORDER BY id OFFSET (s.n % 3) LIMIT 1
 ) AS w_user ON true
