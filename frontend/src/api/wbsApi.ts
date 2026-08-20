@@ -33,6 +33,14 @@ export function useWbsList(from: string, to: string) {
   });
 }
 
+export function useMyWbsList(status?: WbsStatus) {
+  return useQuery({
+    queryKey: ['wbs', 'mine', status ?? 'ALL'],
+    queryFn: () =>
+      apiFetch<Wbs[]>(`/wbs?mine=true${status ? `&status=${status}` : ''}`),
+  });
+}
+
 export function useWbs(id: string | null) {
   return useQuery({
     queryKey: ['wbs', 'detail', id],
