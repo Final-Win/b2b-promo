@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CalendarGrid from '../features/calendar/CalendarGrid';
+import WbsDetailPanel from '../features/wbs-detail/WbsDetailPanel';
 
 export default function CalendarPage() {
   const [weekOffset, setWeekOffset] = useState(0);
@@ -23,6 +24,8 @@ export default function CalendarPage() {
       >
         내 WBS관리 탭
       </button>
+
+      <WbsDetailPanel />
     </div>
   );
 }
