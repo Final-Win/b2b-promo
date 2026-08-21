@@ -77,7 +77,12 @@ export default function CalendarGrid({ weekOffset }: CalendarGridProps) {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, minmax(90px, 1fr))',
+                // 1행(날짜 숫자)만 고정 높이로 확보한다. gridAutoRows를 고정값으로 두면
+                // 날짜 셀의 '1 / span 999' 트릭이 빈 암시적 행 999개까지 그 높이로
+                // 강제로 늘려버려 주(week) 한 줄이 수만 px로 부풀어버리므로 auto를 유지한다.
+                gridTemplateRows: '22px',
                 gridAutoRows: 'auto',
+                rowGap: 2,
                 borderTop: '1px solid var(--color-line)',
               }}
             >
@@ -102,7 +107,10 @@ export default function CalendarGrid({ weekOffset }: CalendarGridProps) {
                       // '-1'은 명시적 그리드 끝을 가리켜 auto로 추가되는 막대 행들을
                       // 안정적으로 덮지 못할 수 있어, 충분히 큰 span으로 전체를 덮는다.
                       gridRow: '1 / span 999',
-                      padding: 4,
+                      // 주의: 이 셀에 position/z-index를 주면 셀 전체(열 전체 높이)가
+                      // 막대보다 위에서 클릭을 가로채 막대 클릭이 막힌다. static으로 두어
+                      // 막대(WbsBar, position:relative)가 항상 이 셀 위에 그려지게 유지한다.
+                      padding: '2px 4px',
                       fontWeight: dayISO === todayISO ? 'bold' : 'normal',
                       color: dayISO === todayISO ? 'var(--color-primary-700)' : undefined,
                       background: isInDragRange(dayISO) ? 'var(--color-primary-100)' : undefined,
