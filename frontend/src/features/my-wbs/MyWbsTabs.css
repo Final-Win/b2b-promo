@@ -13,7 +13,9 @@
   gap: 10px;
 }
 
-@media (max-width: 375px) {
+/* max-width: 375px는 devicePixelRatio 부동소수점 오차로 정확히 375px
+   뷰포트에서 매칭에 실패할 수 있어(예: dpr 1.0000000149) 여유를 둔다. */
+@media (max-width: 480px) {
   .my-wbs-tabs {
     top: auto;
     bottom: 0;
