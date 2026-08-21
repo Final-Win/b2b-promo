@@ -3,10 +3,16 @@ const usersDb = require('../db/users.db');
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { EMAIL_REGEX, USER_STATUSES } = require('../utils/constants');
 
+// 운영에서는 프론트(teamcj-schedule.vercel.app)와 백엔드(teamcj-schedule-api.vercel.app)가
+// 서로 다른 사이트로 취급된다(.vercel.app이 Public Suffix List에 등록돼 서브도메인마다
+// 별도 site). 크로스사이트 fetch에도 쿠키가 전송되려면 SameSite=None + Secure가 필요하다.
+// 로컬 개발은 같은 site(localhost)라 Lax로 충분하고, SameSite=None은 Secure 없이는
+// 최신 브라우저가 거부하므로 dev에는 쓰지 않는다.
+const isProd = process.env.NODE_ENV === 'production';
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production',
+  sameSite: isProd ? 'none' : 'lax',
+  secure: isProd,
   maxAge: 14 * 24 * 60 * 60 * 1000,
 };
 
@@ -94,7 +100,7 @@ async function refresh(req, res, next) {
 async function logout(req, res, next) {
   try {
     await usersDb.incrementTokenVersion(req.user.id);
-    res.clearCookie('refresh_token');
+    res.clearCookie('refresh_token', { sameSite: REFRESH_COOKIE_OPTIONS.sameSite, secure: REFRESH_COOKIE_OPTIONS.secure });
     res.status(200).end();
   } catch (err) {
     next(err);
@@ -116,7 +122,7 @@ async function me(req, res, next) {
 async function withdraw(req, res, next) {
   try {
     await usersDb.setWithdrawn(req.user.id);
-    res.clearCookie('refresh_token');
+    res.clearCookie('refresh_token', { sameSite: REFRESH_COOKIE_OPTIONS.sameSite, secure: REFRESH_COOKIE_OPTIONS.secure });
     res.status(200).end();
   } catch (err) {
     next(err);
