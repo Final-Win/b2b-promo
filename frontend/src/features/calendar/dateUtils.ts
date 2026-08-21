@@ -1,3 +1,6 @@
+// 대부분 주말에는 일정을 등록하지 않으므로 캘린더는 평일(월~금)만 노출한다.
+export const WEEKDAYS_PER_ROW = 5;
+
 export function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);

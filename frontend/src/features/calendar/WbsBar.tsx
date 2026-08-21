@@ -3,7 +3,7 @@ import { WBS_STATUS_COLORS } from '../../shared/constants';
 import { useWbsPanelStore } from '../../api/wbsPanelStore';
 import { useUpdateWbs } from '../../api/wbsApi';
 import type { Wbs, WbsInput } from '../../api/wbsApi';
-import { addDays, diffDays, toISO } from './dateUtils';
+import { addDays, diffDays, toISO, WEEKDAYS_PER_ROW } from './dateUtils';
 
 interface WbsBarProps {
   wbs: Wbs;
@@ -32,8 +32,11 @@ export default function WbsBar({ wbs, startCol, endCol, row, weekStart }: WbsBar
       const rowContainer = barRef.current?.parentElement;
       if (!rowContainer) return;
       const rect = rowContainer.getBoundingClientRect();
-      const colWidth = rect.width / 7;
-      const dayIndex = Math.min(6, Math.max(0, Math.floor((e.clientX - rect.left) / colWidth)));
+      const colWidth = rect.width / WEEKDAYS_PER_ROW;
+      const dayIndex = Math.min(
+        WEEKDAYS_PER_ROW - 1,
+        Math.max(0, Math.floor((e.clientX - rect.left) / colWidth)),
+      );
       let newEnd = toISO(addDays(weekStart, dayIndex));
       if (newEnd < wbs.start_date) newEnd = wbs.start_date;
       setPreviewEndDate(newEnd);
@@ -67,7 +70,7 @@ export default function WbsBar({ wbs, startCol, endCol, row, weekStart }: WbsBar
   }, [resizing, weekStart, wbs, updateWbs]);
 
   const previewEndCol = previewEndDate
-    ? Math.min(7, Math.max(startCol, diffDays(new Date(previewEndDate), weekStart) + 1))
+    ? Math.min(WEEKDAYS_PER_ROW, Math.max(startCol, diffDays(new Date(previewEndDate), weekStart) + 1))
     : endCol;
   const displayEndCol = resizing ? previewEndCol : endCol;
 
